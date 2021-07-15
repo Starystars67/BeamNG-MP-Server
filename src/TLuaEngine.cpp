@@ -6,6 +6,8 @@
 
 namespace fs = std::filesystem;
 
+std::unordered_map<std::string, lua_State*> TLuaEngine::mGlobals;
+
 // necessary as lua relies on global state
 TLuaEngine* TheEngine;
 
@@ -75,7 +77,11 @@ void TLuaEngine::FolderList(const std::string& Path, bool HotSwap) {
 }
 
 void TLuaEngine::RegisterFiles(const std::string& Path, bool HotSwap) {
+#if defined(__linux) || defined(__linux__)
+    std::string Name = Path.substr(Path.find_last_of('/') + 1);
+#else
     std::string Name = Path.substr(Path.find_last_of('\\') + 1);
+#endif
     if (!HotSwap)
         info(("Loading plugin : ") + Name);
     for (const auto& entry : fs::directory_iterator(Path)) {

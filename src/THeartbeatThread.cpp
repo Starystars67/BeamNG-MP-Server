@@ -35,12 +35,12 @@ void THeartbeatThread::operator()() {
 
         Body += "&pps=" + Application::PPS();
 
-        T = Http::POST(Application::GetBackendHostname(), "/heartbeat", {}, Body, false);
+        T = Http::POST(Application::GetBackendHostname(), 443, "/heartbeat", {}, Body, "application/x-www-form-urlencoded");
 
         if (T.substr(0, 2) != "20") {
             //Backend system refused server startup!
             std::this_thread::sleep_for(std::chrono::milliseconds(500));
-            T = Http::POST(Application::GetBackendHostname(), "/heartbeat", {}, Body, false);
+            T = Http::POST(Application::GetBackendHostname(), 443, "/heartbeat", {}, Body, "application/x-www-form-urlencoded");
             // TODO backup2 + HTTP flag (no TSL)
             if (T.substr(0, 2) != "20") {
                 warn("Backend system refused server! Server might not show in the public list");
@@ -71,8 +71,8 @@ std::string THeartbeatThread::GenerateCall() {
         << "&port=" << Application::Settings.Port
         << "&map=" << Application::Settings.MapName
         << "&private=" << (Application::Settings.Private ? "true" : "false")
-        << "&version=" << Application::ServerVersion()
-        << "&clientversion=" << Application::ClientVersion()
+        << "&version=" << Application::ServerVersionString()
+        << "&clientversion=" << Application::ClientVersionString()
         << "&name=" << Application::Settings.ServerName
         << "&modlist=" << mResourceManager.TrimmedList()
         << "&modstotalsize=" << mResourceManager.MaxModSize()

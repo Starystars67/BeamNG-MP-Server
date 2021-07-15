@@ -8,6 +8,14 @@
 
 #include "TConsole.h"
 
+struct Version {
+    uint8_t major;
+    uint8_t minor;
+    uint8_t patch;
+    Version(uint8_t major, uint8_t minor, uint8_t patch);
+    std::string AsString();
+};
+
 // static class handling application start, shutdown, etc.
 // yes, static classes, singletons, globals are all pretty
 // bad idioms. In this case we need a central way to access
@@ -40,6 +48,7 @@ public:
         std::string CustomIP;
         [[nodiscard]] bool HasCustomIP() const { return !CustomIP.empty(); }
     };
+
     using TShutdownHandler = std::function<void()>;
 
     // methods
@@ -50,8 +59,9 @@ public:
     // Causes all threads to finish up and exit gracefull gracefully
     static void GracefullyShutdown();
     static TConsole& Console() { return *mConsole; }
-    static std::string ServerVersion() { return "2.1.3"; }
-    static std::string ClientVersion() { return "2.0"; }
+    static std::string ServerVersionString();
+    static const Version& ServerVersion() { return mVersion; }
+    static std::string ClientVersionString() { return "2.0"; }
     static std::string PPS() { return mPPS; }
     static void SetPPS(std::string NewPPS) { mPPS = NewPPS; }
 
@@ -66,6 +76,8 @@ private:
     static std::unique_ptr<TConsole> mConsole;
     static inline std::mutex mShutdownHandlersMutex {};
     static inline std::deque<TShutdownHandler> mShutdownHandlers {};
+
+    static inline Version mVersion { 2, 2, 0 };
 };
 
 std::string ThreadName();
@@ -120,4 +132,3 @@ void RegisterThread(const std::string str);
 #define Biggest 30000
 std::string Comp(std::string Data);
 std::string DeComp(std::string Compressed);
-
